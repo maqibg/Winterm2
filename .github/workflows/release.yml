@@ -28,9 +28,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --ignore-scripts
 
-      - name: Rebuild native modules for Electron
-        run: npx electron-rebuild -f
-
       - name: Build & Package
         run: pnpm dist
 
