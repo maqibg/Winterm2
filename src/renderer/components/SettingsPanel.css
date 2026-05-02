@@ -24,3 +24,4 @@
 .divider-color-picker { width: 22px; height: 22px; border: none; border-radius: 4px; cursor: pointer; background: transparent; padding: 0; }
 .divider-width-group { display: flex; align-items: center; gap: 8px; }
 .divider-width-value { font-size: 12px; min-width: 30px; text-align: right; opacity: 0.8; }
+.settings-footer { padding: 12px 20px; border-top: 1px solid var(--border); text-align: center; font-size: 12px; color: var(--tab-inactive-text); }

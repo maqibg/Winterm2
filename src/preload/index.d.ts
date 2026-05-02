@@ -11,6 +11,7 @@ interface TerminalAPI {
 }
 
 interface WindowAPI {
+  getVersion(): Promise<string>
   minimize(): void
   maximize(): void
   close(): void

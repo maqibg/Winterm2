@@ -69,12 +69,6 @@ const App: React.FC = () => {
     document.documentElement.style.setProperty('--divider-color', dividerColor)
   }, [dividerColor])
 
-  useEffect(() => {
-    if (useTabStore.getState().tabs.length === 0) {
-      addTab()
-    }
-  }, [tabs.length, addTab])
-
   // Register keybindings once — use getState() inside handlers to always get fresh state
   useEffect(() => {
     keybindingManager.register('newTab', () => {

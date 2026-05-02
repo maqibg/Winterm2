@@ -71,6 +71,9 @@ function createWindow(): void {
   ipcMain.handle('config:read', (_event, name: string) => readConfig(name))
   ipcMain.on('config:write', (_event, name: string, data: string) => writeConfig(name, data))
 
+  // 应用版本
+  ipcMain.handle('app:getVersion', () => app.getVersion())
+
   // 最大化状态变化通知
   mainWindow.on('maximize', () => {
     mainWindow?.webContents.send('window:maximized-changed', true)

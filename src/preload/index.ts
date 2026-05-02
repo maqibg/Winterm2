@@ -56,6 +56,10 @@ contextBridge.exposeInMainWorld('terminalAPI', {
 })
 
 contextBridge.exposeInMainWorld('windowAPI', {
+  getVersion(): Promise<string> {
+    return ipcRenderer.invoke('app:getVersion')
+  },
+
   minimize(): void {
     ipcRenderer.invoke('window:minimize')
   },

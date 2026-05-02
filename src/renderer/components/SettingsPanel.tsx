@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSettingsStore } from '../store/settingsStore'
 import { useThemeStore } from '../store/themeStore'
 import { keybindingManager } from '../keybindings/manager'
@@ -12,6 +12,11 @@ interface SettingsPanelProps {
 export const SettingsPanel: React.FC<SettingsPanelProps> = ({ visible, onClose }) => {
   const settings = useSettingsStore()
   const { themes, currentTheme, setTheme } = useThemeStore()
+  const [version, setVersion] = useState('')
+
+  useEffect(() => {
+    window.windowAPI.getVersion().then(setVersion).catch(() => {})
+  }, [])
 
   if (!visible) return null
 
@@ -207,6 +212,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ visible, onClose }
             </ul>
           </div>
         </div>
+        {version && <div className="settings-footer">WinTerm2 v{version}</div>}
       </div>
     </>
   )
