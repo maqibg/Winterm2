@@ -10,6 +10,7 @@ import { useTabStore, getLastSessionJson, saveSessionSyncFallback } from './stor
 import StatusBar from './components/StatusBar'
 import { useThemeStore } from './store/themeStore'
 import { useSettingsStore } from './store/settingsStore'
+import { useCommandStore } from './store/commandStore'
 import { keybindingManager } from './keybindings/manager'
 import { getSearchAddon, setSyncInputCallback } from './hooks/useTerminal'
 import { CommandPalette } from './components/CommandPalette'
@@ -41,12 +42,16 @@ const App: React.FC = () => {
   const activePaneId = useTabStore((s) => s.tabs.find(t => t.id === s.activeTabId)?.activePaneId ?? '')
 
   useEffect(() => {
-    const { themeName } = useSettingsStore.getState()
-    if (themeName) {
-      useThemeStore.getState().setTheme(themeName)
-    } else {
-      applyThemeToCSS()
-    }
+    // Load config from files, then apply theme
+    useSettingsStore.getState().loadSettings().then(() => {
+      const { themeName } = useSettingsStore.getState()
+      if (themeName) {
+        useThemeStore.getState().setTheme(themeName)
+      } else {
+        applyThemeToCSS()
+      }
+    })
+    useCommandStore.getState().loadCommands()
     // Restore session, then ensure at least one tab exists
     useTabStore.getState().restoreSession()
     if (useTabStore.getState().tabs.length === 0) {

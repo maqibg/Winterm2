@@ -21,6 +21,9 @@ Desktop.ini
 .env.local
 .env.*.local
 
+# User data
+data/
+
 # Logs
 *.log
 npm-debug.log*

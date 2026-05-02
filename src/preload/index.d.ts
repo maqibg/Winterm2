@@ -32,12 +32,18 @@ interface ClipboardAPI {
   readText(): string
 }
 
+interface ConfigAPI {
+  read(name: string): Promise<string | null>
+  write(name: string, data: string): void
+}
+
 declare global {
   interface Window {
     terminalAPI: TerminalAPI
     windowAPI: WindowAPI
     shellAPI: ShellAPI
     clipboardAPI: ClipboardAPI
+    configAPI: ConfigAPI
   }
 }
 

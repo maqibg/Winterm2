@@ -1,6 +1,7 @@
 import { app, BrowserWindow, Menu, ipcMain, shell } from 'electron'
 import { join } from 'path'
 import { setupPtyHandlers, destroyAllPtys } from './ptyManager'
+import { readConfig, writeConfig } from './configManager'
 
 const isDev = !app.isPackaged
 
@@ -65,6 +66,10 @@ function createWindow(): void {
       // ignore
     }
   })
+
+  // 配置文件读写
+  ipcMain.handle('config:read', (_event, name: string) => readConfig(name))
+  ipcMain.on('config:write', (_event, name: string, data: string) => writeConfig(name, data))
 
   // 最大化状态变化通知
   mainWindow.on('maximize', () => {

@@ -1,6 +1,6 @@
 {
   "name": "winterm2",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Windows 版 iTerm2 - 高级终端模拟器",
   "main": "./out/main/index.js",
   "scripts": {
@@ -38,6 +38,7 @@
   "build": {
     "appId": "com.winterm2.app",
     "productName": "WinTerm2",
+    "npmRebuild": false,
     "win": {
       "target": [
         "nsis"

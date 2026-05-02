@@ -19,7 +19,7 @@ interface Settings {
 
 interface SettingsState extends Settings {
   updateSettings: (partial: Partial<Settings>) => void
-  loadSettings: () => void
+  loadSettings: () => Promise<void>
   saveSettings: () => void
 }
 
@@ -40,56 +40,52 @@ const defaultSettings: Settings = {
   copyOnSelect: false
 }
 
-const STORAGE_KEY = 'winterm2-settings'
+const CONFIG_NAME = 'settings'
 
-function loadSavedSettings(): Settings {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) {
-      const saved = JSON.parse(raw) as Partial<Settings>
-      return { ...defaultSettings, ...saved }
-    }
-  } catch {
-    // ignore parse errors, use defaults
+function extractSettings(state: SettingsState): Settings {
+  return {
+    fontFamily: state.fontFamily,
+    fontSize: state.fontSize,
+    lineHeight: state.lineHeight,
+    cursorStyle: state.cursorStyle,
+    cursorBlink: state.cursorBlink,
+    opacity: state.opacity,
+    defaultShell: state.defaultShell,
+    scrollback: state.scrollback,
+    startupCwd: state.startupCwd,
+    themeName: state.themeName,
+    dividerColor: state.dividerColor,
+    dividerWidth: state.dividerWidth,
+    rightClickPaste: state.rightClickPaste,
+    copyOnSelect: state.copyOnSelect
   }
-  return defaultSettings
 }
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
-  ...loadSavedSettings(),
+  ...defaultSettings,
 
   updateSettings: (partial: Partial<Settings>) => {
     set(partial)
     get().saveSettings()
   },
 
-  loadSettings: () => {
-    const saved = loadSavedSettings()
-    set(saved)
+  loadSettings: async () => {
+    try {
+      const raw = await window.configAPI.read(CONFIG_NAME)
+      if (raw) {
+        const saved = JSON.parse(raw) as Partial<Settings>
+        set({ ...defaultSettings, ...saved })
+      }
+    } catch {
+      // ignore, keep defaults
+    }
   },
 
   saveSettings: () => {
     try {
-      const state = get()
-      const settings: Settings = {
-        fontFamily: state.fontFamily,
-        fontSize: state.fontSize,
-        lineHeight: state.lineHeight,
-        cursorStyle: state.cursorStyle,
-        cursorBlink: state.cursorBlink,
-        opacity: state.opacity,
-        defaultShell: state.defaultShell,
-        scrollback: state.scrollback,
-        startupCwd: state.startupCwd,
-        themeName: state.themeName,
-        dividerColor: state.dividerColor,
-        dividerWidth: state.dividerWidth,
-        rightClickPaste: state.rightClickPaste,
-        copyOnSelect: state.copyOnSelect
-      }
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
+      window.configAPI.write(CONFIG_NAME, JSON.stringify(extractSettings(get()), null, 2))
     } catch {
-      // ignore storage errors
+      // ignore
     }
   }
 }))

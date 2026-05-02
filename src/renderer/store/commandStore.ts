@@ -13,11 +13,11 @@ interface CommandState {
   addCommand: (cmd: Omit<CommandItem, 'id'>) => void
   updateCommand: (id: string, updates: Partial<Omit<CommandItem, 'id'>>) => void
   removeCommand: (id: string) => void
-  loadCommands: () => void
+  loadCommands: () => Promise<void>
   saveCommands: () => void
 }
 
-const STORAGE_KEY = 'winterm2-commands'
+const CONFIG_NAME = 'commands'
 
 const defaultCommands: CommandItem[] = [
   { id: nanoid(), name: '查看IP', command: 'ipconfig', group: '系统' },
@@ -27,26 +27,8 @@ const defaultCommands: CommandItem[] = [
   { id: nanoid(), name: 'Git差异', command: 'git diff', group: 'Git' },
 ]
 
-function loadSavedCommands(): CommandItem[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) {
-      const saved = JSON.parse(raw) as CommandItem[]
-      if (saved.length > 0) {
-        // Merge missing default groups
-        const savedGroups = new Set(saved.map(c => c.group))
-        const missing = defaultCommands.filter(c => !savedGroups.has(c.group))
-        return missing.length > 0 ? [...saved, ...missing] : saved
-      }
-    }
-  } catch {
-    // ignore
-  }
-  return defaultCommands
-}
-
 export const useCommandStore = create<CommandState>((set, get) => ({
-  commands: loadSavedCommands(),
+  commands: [...defaultCommands],
 
   addCommand: (cmd) => {
     const newCmd: CommandItem = { ...cmd, id: nanoid() }
@@ -66,13 +48,28 @@ export const useCommandStore = create<CommandState>((set, get) => ({
     get().saveCommands()
   },
 
-  loadCommands: () => {
-    set({ commands: loadSavedCommands() })
+  loadCommands: async () => {
+    try {
+      const raw = await window.configAPI.read(CONFIG_NAME)
+      if (raw) {
+        const saved = JSON.parse(raw) as CommandItem[]
+        if (saved.length > 0) {
+          // Merge missing default groups
+          const savedGroups = new Set(saved.map(c => c.group))
+          const missing = defaultCommands.filter(c => !savedGroups.has(c.group))
+          set({ commands: missing.length > 0 ? [...saved, ...missing] : saved })
+          return
+        }
+      }
+    } catch {
+      // ignore
+    }
+    set({ commands: [...defaultCommands] })
   },
 
   saveCommands: () => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(get().commands))
+      window.configAPI.write(CONFIG_NAME, JSON.stringify(get().commands, null, 2))
     } catch {
       // ignore
     }

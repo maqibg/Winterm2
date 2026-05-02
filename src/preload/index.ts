@@ -124,3 +124,12 @@ contextBridge.exposeInMainWorld('clipboardAPI', {
     return clipboard.readText()
   }
 })
+
+contextBridge.exposeInMainWorld('configAPI', {
+  read(name: string): Promise<string | null> {
+    return ipcRenderer.invoke('config:read', name)
+  },
+  write(name: string, data: string): void {
+    ipcRenderer.send('config:write', name, data)
+  }
+})
