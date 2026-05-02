@@ -1,0 +1,261 @@
+.command-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
+}
+
+.command-panel {
+  position: fixed;
+  top: 36px;
+  right: 120px;
+  width: 360px;
+  max-height: 480px;
+  background: var(--settings-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.command-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--settings-text);
+}
+
+.command-panel-header-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.command-panel-icon-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--settings-text);
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.command-panel-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.command-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 0;
+}
+
+.command-panel-group {
+  margin-bottom: 2px;
+}
+
+.command-panel-group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--settings-text);
+  cursor: pointer;
+  user-select: none;
+}
+
+.command-panel-group-header:hover {
+  color: var(--accent);
+}
+
+.command-panel-group-arrow {
+  font-size: 8px;
+  transition: transform 0.15s;
+}
+
+.command-panel-group-arrow.collapsed {
+  transform: rotate(-90deg);
+}
+
+.command-panel-cmd {
+  display: flex;
+  align-items: center;
+  padding: 6px 14px 6px 26px;
+  cursor: pointer;
+  color: var(--settings-text);
+  font-size: 13px;
+  gap: 8px;
+  border-radius: 4px;
+  margin: 0 6px;
+}
+
+.command-panel-cmd:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.command-panel-cmd-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.command-panel-cmd-text {
+  font-size: 11px;
+  color: var(--tab-inactive-text);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.command-panel-cmd:hover .command-panel-cmd-text {
+  color: var(--settings-text);
+}
+
+.command-panel-cmd-actions {
+  display: none;
+  gap: 2px;
+}
+
+.command-panel-cmd:hover .command-panel-cmd-actions {
+  display: flex;
+}
+
+.command-panel-cmd-btn {
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: var(--settings-text);
+  cursor: pointer;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.command-panel-cmd-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.command-panel-form {
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.command-panel-form-row {
+  display: flex;
+  gap: 6px;
+}
+
+.command-panel-input {
+  flex: 1;
+  padding: 5px 8px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  color: var(--input-text);
+  font-size: 12px;
+  outline: none;
+}
+
+.command-panel-input:focus {
+  border-color: var(--accent);
+}
+
+.command-panel-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.command-panel-btn {
+  padding: 4px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.command-panel-btn-primary {
+  background: var(--button-bg);
+  color: var(--button-text);
+}
+
+.command-panel-btn-primary:hover {
+  background: var(--button-hover);
+}
+
+.command-panel-btn-cancel {
+  background: transparent;
+  color: var(--settings-text);
+  border: 1px solid var(--border);
+}
+
+.command-panel-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.command-panel-empty {
+  padding: 24px 14px;
+  text-align: center;
+  color: var(--tab-inactive-text);
+  font-size: 13px;
+}
+
+/* Group Select Dropdown */
+.group-select {
+  flex: 1;
+  position: relative;
+}
+
+.group-select-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 2px;
+  background: #2a2a2a;
+  border: 1px solid #555;
+  border-radius: 4px;
+  max-height: 120px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.group-select-option {
+  padding: 6px 8px;
+  font-size: 12px;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.group-select-option:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.group-select-option.selected {
+  color: var(--accent);
+}

@@ -273,7 +273,7 @@ const App: React.FC = () => {
 
   return (
     <div className="app">
-      <TitleBar />
+      <TitleBar onSettingsClick={() => setSettingsVisible((v) => !v)} />
       <TabBar />
       <div className="terminal-area">
         {tabs.map((tab) => {

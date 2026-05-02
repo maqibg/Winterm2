@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from 'react'
+import { CommandPanel } from './CommandPanel'
 import './TitleBar.css'
 
-const TitleBar: React.FC = () => {
+interface TitleBarProps {
+  onSettingsClick: () => void
+}
+
+const TitleBar: React.FC<TitleBarProps> = ({ onSettingsClick }) => {
   const [isMaximized, setIsMaximized] = useState(false)
+  const [commandPanelVisible, setCommandPanelVisible] = useState(false)
 
   useEffect(() => {
     const cleanup = window.windowAPI.onMaximizeChange((maximized: boolean) => {
@@ -17,6 +23,8 @@ const TitleBar: React.FC = () => {
     <div className="title-bar">
       <div className="title-bar-title">WinTerm2</div>
       <div className="title-bar-controls">
+        <button className="title-bar-btn tool-btn" onClick={() => setCommandPanelVisible(v => !v)} title="常用命令">命令</button>
+        <button className="title-bar-btn tool-btn" onClick={onSettingsClick} title="设置">设置</button>
         <button className="title-bar-btn" onClick={() => window.windowAPI.minimize()}>
           <svg width="10" height="1" viewBox="0 0 10 1"><rect width="10" height="1" fill="currentColor" /></svg>
         </button>
@@ -39,6 +47,7 @@ const TitleBar: React.FC = () => {
           </svg>
         </button>
       </div>
+      <CommandPanel visible={commandPanelVisible} onClose={() => setCommandPanelVisible(false)} />
     </div>
   )
 }

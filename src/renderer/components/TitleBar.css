@@ -4,3 +4,4 @@
 .title-bar-btn { width: 46px; height: 32px; border: none; background: transparent; color: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; }
 .title-bar-btn:hover { background: rgba(255,255,255,0.1); }
 .title-bar-btn.close:hover { background: #e81123; color: white; }
+.title-bar-btn.tool-btn { width: auto; padding: 0 10px; }
