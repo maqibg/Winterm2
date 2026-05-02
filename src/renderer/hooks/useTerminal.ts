@@ -81,7 +81,7 @@ function getOrCreateInstance(paneId: string, options: {
     console.warn('WebGL addon failed to load, falling back to canvas renderer:', e)
   }
 
-  term.attachCustomKeyEventHandler(keybindingManager.createXtermKeyHandler())
+  term.attachCustomKeyEventHandler(keybindingManager.createSmartKeyHandler(term))
 
   const instance: TerminalInstance = {
     terminal: term,
@@ -144,6 +144,13 @@ function attachToContainer(paneId: string, instance: TerminalInstance, container
       window.terminalAPI.writePty(paneId, data)
       if (syncInputCallback) {
         syncInputCallback(paneId, data)
+      }
+    })
+
+    // Copy on select
+    term.onSelectionChange(() => {
+      if (useSettingsStore.getState().copyOnSelect && term.hasSelection()) {
+        navigator.clipboard.writeText(term.getSelection())
       }
     })
 

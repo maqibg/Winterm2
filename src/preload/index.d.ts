@@ -25,11 +25,19 @@ interface ShellAPI {
   openTerminalPath(paneId: string, rawPath: string): Promise<void>
 }
 
+interface ClipboardAPI {
+  hasImage(): boolean
+  readImageAsPngBase64(): string | null
+  saveImageToTempFile(): string | null
+  readText(): string
+}
+
 declare global {
   interface Window {
     terminalAPI: TerminalAPI
     windowAPI: WindowAPI
     shellAPI: ShellAPI
+    clipboardAPI: ClipboardAPI
   }
 }
 

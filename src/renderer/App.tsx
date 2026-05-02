@@ -76,9 +76,13 @@ const App: React.FC = () => {
       useTabStore.getState().addTab()
     })
 
+    keybindingManager.register('duplicateTab', () => {
+      useTabStore.getState().duplicateTab()
+    })
+
     keybindingManager.register('closeTab', () => {
-      const { activeTabId, removeTab } = useTabStore.getState()
-      if (activeTabId) removeTab(activeTabId)
+      const tab = useTabStore.getState().getActiveTab()
+      if (tab) useTabStore.getState().closePane(tab.id, tab.activePaneId)
     })
 
     keybindingManager.register('nextTab', () => {
@@ -107,12 +111,6 @@ const App: React.FC = () => {
       const { getActiveTab, splitPane } = useTabStore.getState()
       const tab = getActiveTab()
       if (tab) splitPane(tab.id, tab.activePaneId, 'vertical')
-    })
-
-    keybindingManager.register('closePane', () => {
-      const { getActiveTab, closePane } = useTabStore.getState()
-      const tab = getActiveTab()
-      if (tab) closePane(tab.id, tab.activePaneId)
     })
 
     keybindingManager.register('focusLeft', () => {
@@ -153,21 +151,6 @@ const App: React.FC = () => {
 
     keybindingManager.register('search', () => setSearchVisible((v) => !v))
 
-    keybindingManager.register('copy', () => {
-      const tab = useTabStore.getState().getActiveTab()
-      if (!tab) return
-      const event = new CustomEvent('winterm2:copy', { detail: { paneId: tab.activePaneId } })
-      window.dispatchEvent(event)
-    })
-
-    keybindingManager.register('paste', () => {
-      const tab = useTabStore.getState().getActiveTab()
-      if (!tab) return
-      navigator.clipboard.readText().then(text => {
-        if (text) window.terminalAPI.writePty(tab.activePaneId, text)
-      })
-    })
-
     keybindingManager.register('zoomIn', () => {
       const s = useSettingsStore.getState()
       s.updateSettings({ fontSize: Math.min(32, s.fontSize + 1) })
@@ -191,10 +174,10 @@ const App: React.FC = () => {
 
     return () => {
       window.removeEventListener('keydown', handler)
-      ;['newTab', 'closeTab', 'nextTab', 'prevTab', 'splitHorizontal', 'splitVertical',
-        'closePane', 'focusLeft', 'focusRight', 'focusUp', 'focusDown', 'toggleFullscreen',
+      ;['newTab', 'duplicateTab', 'closeTab', 'nextTab', 'prevTab', 'splitHorizontal', 'splitVertical',
+        'focusLeft', 'focusRight', 'focusUp', 'focusDown', 'toggleFullscreen',
         'newFloatingPane', 'toggleFloatingPane', 'toggleSyncInput', 'commandPalette',
-        'search', 'copy', 'paste', 'zoomIn', 'zoomOut', 'zoomReset', 'openSettings'
+        'search', 'zoomIn', 'zoomOut', 'zoomReset', 'openSettings'
       ].forEach((a) => keybindingManager.unregister(a))
     }
   }, [])
@@ -246,11 +229,27 @@ const App: React.FC = () => {
     const kb = keybindingManager.getKeybindings()
     const findKeys = (action: string) => kb.find(k => k.action === action)?.keys || ''
     return [
+      { id: 'copy', label: '复制', keys: 'Ctrl+C', action: () => {
+        const tab = useTabStore.getState().getActiveTab()
+        if (!tab) return
+        window.dispatchEvent(new CustomEvent('winterm2:copy', { detail: { paneId: tab.activePaneId } }))
+      }},
+      { id: 'paste', label: '粘贴', keys: 'Ctrl+V', action: () => {
+        const tab = useTabStore.getState().getActiveTab()
+        if (!tab) return
+        const paneId = tab.activePaneId
+        if (window.clipboardAPI.hasImage()) {
+          window.terminalAPI.writePty(paneId, '\x1bv')
+        } else {
+          const text = window.clipboardAPI.readText()
+          if (text) window.terminalAPI.writePty(paneId, text)
+        }
+      }},
       { id: 'newTab', label: '新建标签页', keys: findKeys('newTab'), action: () => useTabStore.getState().addTab() },
-      { id: 'closeTab', label: '关闭标签页', keys: findKeys('closeTab'), action: () => { const { activeTabId, removeTab } = useTabStore.getState(); if (activeTabId) removeTab(activeTabId) } },
+      { id: 'duplicateTab', label: '复制标签页', keys: findKeys('duplicateTab'), action: () => useTabStore.getState().duplicateTab() },
+      { id: 'closeTab', label: '关闭标签/面板', keys: 'Ctrl+W', action: () => { const tab = useTabStore.getState().getActiveTab(); if (tab) useTabStore.getState().closePane(tab.id, tab.activePaneId) } },
       { id: 'splitHorizontal', label: '水平分屏', keys: findKeys('splitHorizontal'), action: () => { const { getActiveTab, splitPane } = useTabStore.getState(); const tab = getActiveTab(); if (tab) splitPane(tab.id, tab.activePaneId, 'horizontal') } },
       { id: 'splitVertical', label: '垂直分屏', keys: findKeys('splitVertical'), action: () => { const { getActiveTab, splitPane } = useTabStore.getState(); const tab = getActiveTab(); if (tab) splitPane(tab.id, tab.activePaneId, 'vertical') } },
-      { id: 'closePane', label: '关闭面板', keys: findKeys('closePane'), action: () => { const { getActiveTab, closePane } = useTabStore.getState(); const tab = getActiveTab(); if (tab) closePane(tab.id, tab.activePaneId) } },
       { id: 'toggleFullscreen', label: '面板全屏', keys: findKeys('toggleFullscreen'), action: () => { const { getActiveTab, togglePaneFullscreen } = useTabStore.getState(); const tab = getActiveTab(); if (tab) togglePaneFullscreen(tab.id, tab.activePaneId) } },
       { id: 'newFloatingPane', label: '新建浮动面板', keys: findKeys('newFloatingPane'), action: () => { const tab = useTabStore.getState().getActiveTab(); if (tab) useTabStore.getState().addFloatingPane(tab.id) } },
       { id: 'toggleFloatingPane', label: '显隐浮动面板', keys: findKeys('toggleFloatingPane'), action: () => { const tab = useTabStore.getState().getActiveTab(); if (tab) useTabStore.getState().toggleFloatingPanesVisible(tab.id) } },

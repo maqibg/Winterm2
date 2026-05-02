@@ -1,4 +1,7 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, clipboard, nativeImage } from 'electron'
+import { tmpdir } from 'os'
+import { writeFileSync } from 'fs'
+import { join } from 'path'
 
 contextBridge.exposeInMainWorld('terminalAPI', {
   createPty(id: string, cols: number, rows: number, cwd?: string, shell?: string): Promise<void> {
@@ -94,5 +97,30 @@ contextBridge.exposeInMainWorld('shellAPI', {
   },
   openTerminalPath(paneId: string, rawPath: string): Promise<void> {
     return ipcRenderer.invoke('shell:openTerminalPath', { paneId, rawPath })
+  }
+})
+
+contextBridge.exposeInMainWorld('clipboardAPI', {
+  hasImage(): boolean {
+    return !clipboard.readImage().isEmpty()
+  },
+
+  readImageAsPngBase64(): string | null {
+    const image = clipboard.readImage()
+    if (image.isEmpty()) return null
+    return image.toPNG().toString('base64')
+  },
+
+  saveImageToTempFile(): string | null {
+    const image = clipboard.readImage()
+    if (image.isEmpty()) return null
+    const fileName = `winterm2-clipboard-${Date.now()}.png`
+    const filePath = join(tmpdir(), fileName)
+    writeFileSync(filePath, image.toPNG())
+    return filePath
+  },
+
+  readText(): string {
+    return clipboard.readText()
   }
 })

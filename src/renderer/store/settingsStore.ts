@@ -13,6 +13,8 @@ interface Settings {
   themeName: string
   dividerColor: string
   dividerWidth: number
+  rightClickPaste: boolean
+  copyOnSelect: boolean
 }
 
 interface SettingsState extends Settings {
@@ -31,9 +33,11 @@ const defaultSettings: Settings = {
   defaultShell: '',
   scrollback: 5000,
   startupCwd: '',
-  themeName: 'one-dark',
+  themeName: 'monokai',
   dividerColor: '#ff8c00',
-  dividerWidth: 4
+  dividerWidth: 4,
+  rightClickPaste: false,
+  copyOnSelect: false
 }
 
 const STORAGE_KEY = 'winterm2-settings'
@@ -79,7 +83,9 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         startupCwd: state.startupCwd,
         themeName: state.themeName,
         dividerColor: state.dividerColor,
-        dividerWidth: state.dividerWidth
+        dividerWidth: state.dividerWidth,
+        rightClickPaste: state.rightClickPaste,
+        copyOnSelect: state.copyOnSelect
       }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
     } catch {

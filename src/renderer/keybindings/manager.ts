@@ -1,3 +1,4 @@
+import type { Terminal } from '@xterm/xterm'
 import type { Keybinding } from './types'
 import { defaultKeybindings } from './defaults'
 
@@ -94,6 +95,35 @@ class KeybindingManager {
       if (e.type !== 'keydown') return true
       // Return false to prevent xterm from handling app-level keybindings
       // Do NOT execute the handler here — the global keydown listener handles that
+      return !this.matchesKeybinding(e)
+    }
+  }
+
+  /** Ctrl+C/V 智能处理：有选中→复制，无选中→SIGINT；V→图片检测或粘贴 */
+  createSmartKeyHandler(term: Terminal): (e: KeyboardEvent) => boolean {
+    return (e: KeyboardEvent): boolean => {
+      if (e.type !== 'keydown') return true
+
+      // Ctrl+C: smart copy/SIGINT
+      if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key === 'c') {
+        if (term.hasSelection()) {
+          navigator.clipboard.writeText(term.getSelection())
+          return false
+        }
+        return true
+      }
+
+      // Ctrl+V: smart paste with image detection
+      if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key === 'v') {
+        if (window.clipboardAPI.hasImage()) {
+          term.write('\x1bv')
+        } else {
+          const text = window.clipboardAPI.readText()
+          if (text) term.paste(text)
+        }
+        return false
+      }
+
       return !this.matchesKeybinding(e)
     }
   }

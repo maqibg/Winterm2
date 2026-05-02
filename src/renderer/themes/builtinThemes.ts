@@ -313,12 +313,12 @@ const monokai: AppTheme = {
 }
 
 export const builtinThemes: AppTheme[] = [
+  monokai,
   oneDark,
   dracula,
   solarizedDark,
   solarizedLight,
-  nord,
-  monokai
+  nord
 ]
 
-export const defaultTheme: AppTheme = oneDark
+export const defaultTheme: AppTheme = monokai

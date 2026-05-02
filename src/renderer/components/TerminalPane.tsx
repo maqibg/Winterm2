@@ -21,6 +21,7 @@ const TerminalPane: React.FC<TerminalPaneProps> = ({ paneId, isActive, isVisible
   const cursorStyle = useSettingsStore((s) => s.cursorStyle)
   const cursorBlink = useSettingsStore((s) => s.cursorBlink)
   const scrollback = useSettingsStore((s) => s.scrollback)
+  const rightClickPaste = useSettingsStore((s) => s.rightClickPaste)
   const xtermTheme = useThemeStore((s) => s.currentTheme.terminal)
   const activeTabId = useTabStore((s) => s.activeTabId)
   const setActivePaneId = useTabStore((s) => s.setActivePaneId)
@@ -52,6 +53,15 @@ const TerminalPane: React.FC<TerminalPaneProps> = ({ paneId, isActive, isVisible
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault()
+    if (rightClickPaste && !e.shiftKey) {
+      if (window.clipboardAPI.hasImage()) {
+        window.terminalAPI.writePty(paneId, '\x1bv')
+      } else {
+        const text = window.clipboardAPI.readText()
+        if (text) window.terminalAPI.writePty(paneId, text)
+      }
+      return
+    }
     setContextMenu({ x: e.clientX, y: e.clientY })
   }
 
@@ -75,7 +85,14 @@ const TerminalPane: React.FC<TerminalPaneProps> = ({ paneId, isActive, isVisible
           onClose={() => setContextMenu(null)}
           items={[
             { label: '复制', action: () => { navigator.clipboard.writeText(document.getSelection()?.toString() || '') } },
-            { label: '粘贴', action: () => { navigator.clipboard.readText().then(text => { if (text) window.terminalAPI.writePty(paneId, text) }) } },
+            { label: '粘贴', action: () => {
+              if (window.clipboardAPI.hasImage()) {
+                window.terminalAPI.writePty(paneId, '\x1bv')
+                return
+              }
+              const text = window.clipboardAPI.readText()
+              if (text) window.terminalAPI.writePty(paneId, text)
+            } },
             { separator: true, label: '', action: () => {} },
             { label: '水平分屏', action: () => { const { getActiveTab, splitPane } = useTabStore.getState(); const tab = getActiveTab(); if (tab) splitPane(tab.id, paneId, 'horizontal') } },
             { label: '垂直分屏', action: () => { const { getActiveTab, splitPane } = useTabStore.getState(); const tab = getActiveTab(); if (tab) splitPane(tab.id, paneId, 'vertical') } },

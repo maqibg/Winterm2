@@ -175,6 +175,24 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ visible, onClose }
                 onChange={e => settings.updateSettings({ startupCwd: e.target.value })}
               />
             </div>
+            <div className="settings-row">
+              <span className="settings-label">右键粘贴</span>
+              <input
+                className="settings-checkbox"
+                type="checkbox"
+                checked={settings.rightClickPaste}
+                onChange={e => settings.updateSettings({ rightClickPaste: e.target.checked })}
+              />
+            </div>
+            <div className="settings-row">
+              <span className="settings-label">选中复制</span>
+              <input
+                className="settings-checkbox"
+                type="checkbox"
+                checked={settings.copyOnSelect}
+                onChange={e => settings.updateSettings({ copyOnSelect: e.target.checked })}
+              />
+            </div>
           </div>
 
           <div className="settings-section">

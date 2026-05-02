@@ -46,6 +46,7 @@ interface TabState {
   tabs: Tab[]
   activeTabId: string
   addTab: () => void
+  duplicateTab: () => void
   removeTab: (tabId: string) => void
   setActiveTab: (tabId: string) => void
   renameTab: (tabId: string, title: string) => void
@@ -342,6 +343,22 @@ export const useTabStore = create<TabState>((set, get) => ({
     set((state) => ({
       tabs: [...state.tabs, tab],
       activeTabId: tab.id
+    }))
+  },
+
+  duplicateTab: () => {
+    const { activeTabId, tabs } = get()
+    const activeTab = tabs.find((t) => t.id === activeTabId)
+    const newTab = createTab()
+    // Copy cwd from active pane to new tab
+    if (activeTab) {
+      window.terminalAPI.getCwd(activeTab.activePaneId).then((cwd) => {
+        if (cwd) setRestoredCwd(newTab.activePaneId, cwd)
+      }).catch(() => {})
+    }
+    set((state) => ({
+      tabs: [...state.tabs, newTab],
+      activeTabId: newTab.id
     }))
   },
 
