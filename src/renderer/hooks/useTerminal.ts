@@ -34,9 +34,15 @@ export function setSyncInputCallback(cb: ((sourcePaneId: string, data: string) =
 const restoredCwds = new Map<string, string>()
 // Cached shell types per pane (queried after PTY creation)
 const paneShellTypes = new Map<string, string>()
+// CLI cwd from right-click context menu (one-time override)
+let cliStartupCwd = ''
 
 export function setRestoredCwd(paneId: string, cwd: string) {
   if (cwd) restoredCwds.set(paneId, cwd)
+}
+
+export function setCliStartupCwd(cwd: string) {
+  cliStartupCwd = cwd
 }
 
 function getOrCreateInstance(paneId: string, options: {
@@ -114,7 +120,10 @@ function attachToContainer(paneId: string, instance: TerminalInstance, container
     const { defaultShell, startupCwd } = useSettingsStore.getState()
     const restoredCwd = restoredCwds.get(paneId)
     if (restoredCwd) restoredCwds.delete(paneId)
-    window.terminalAPI.createPty(paneId, term.cols, term.rows, restoredCwd || startupCwd || undefined, defaultShell || undefined)
+    const effectiveCwd = restoredCwd || cliStartupCwd || startupCwd || undefined
+    // cliStartupCwd is one-time: clear after first use
+    if (cliStartupCwd) cliStartupCwd = ''
+    window.terminalAPI.createPty(paneId, term.cols, term.rows, effectiveCwd, defaultShell || undefined)
     // Cache shell type for link provider
     window.terminalAPI.getShellType(paneId).then(t => paneShellTypes.set(paneId, t)).catch(() => {})
 

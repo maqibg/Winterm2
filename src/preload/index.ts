@@ -60,6 +60,10 @@ contextBridge.exposeInMainWorld('windowAPI', {
     return ipcRenderer.invoke('app:getVersion')
   },
 
+  getStartupCwd(): Promise<string | null> {
+    return ipcRenderer.invoke('app:getStartupCwd')
+  },
+
   minimize(): void {
     ipcRenderer.invoke('window:minimize')
   },

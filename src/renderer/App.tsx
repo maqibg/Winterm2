@@ -12,7 +12,7 @@ import { useThemeStore } from './store/themeStore'
 import { useSettingsStore } from './store/settingsStore'
 import { useCommandStore } from './store/commandStore'
 import { keybindingManager } from './keybindings/manager'
-import { getSearchAddon, setSyncInputCallback } from './hooks/useTerminal'
+import { getSearchAddon, setSyncInputCallback, setCliStartupCwd } from './hooks/useTerminal'
 import { CommandPalette } from './components/CommandPalette'
 import { layoutPresets } from './layouts'
 
@@ -55,11 +55,15 @@ const App: React.FC = () => {
       }
     })
     useCommandStore.getState().loadCommands()
-    // Restore session, then ensure at least one tab exists
-    useTabStore.getState().restoreSession()
-    if (useTabStore.getState().tabs.length === 0) {
-      useTabStore.getState().addTab()
-    }
+    // Check for CLI cwd from right-click context menu
+    window.windowAPI.getStartupCwd().then((cliCwd) => {
+      if (cliCwd) setCliStartupCwd(cliCwd)
+      // Restore session, then ensure at least one tab exists
+      useTabStore.getState().restoreSession()
+      if (useTabStore.getState().tabs.length === 0) {
+        useTabStore.getState().addTab()
+      }
+    })
   }, [])
 
   // Apply window-level opacity

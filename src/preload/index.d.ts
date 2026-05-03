@@ -12,6 +12,7 @@ interface TerminalAPI {
 
 interface WindowAPI {
   getVersion(): Promise<string>
+  getStartupCwd(): Promise<string | null>
   minimize(): void
   maximize(): void
   close(): void

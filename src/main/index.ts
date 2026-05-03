@@ -1,5 +1,6 @@
 import { app, BrowserWindow, Menu, ipcMain, shell } from 'electron'
 import { join } from 'path'
+import { existsSync } from 'fs'
 import { setupPtyHandlers, destroyAllPtys } from './ptyManager'
 import { readConfig, writeConfig } from './configManager'
 import { enableContextMenu, disableContextMenu } from './shellIntegration'
@@ -74,6 +75,13 @@ function createWindow(): void {
 
   // 应用版本
   ipcMain.handle('app:getVersion', () => app.getVersion())
+
+  // 命令行传入的启动目录（右键菜单 "%1" / "%V"）
+  ipcMain.handle('app:getStartupCwd', () => {
+    const arg = process.argv[1]
+    if (arg && existsSync(arg)) return arg
+    return null
+  })
 
   // 右键菜单集成
   ipcMain.handle('shell:enableContextMenu', () => enableContextMenu())
