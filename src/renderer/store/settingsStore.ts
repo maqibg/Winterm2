@@ -15,6 +15,7 @@ interface Settings {
   dividerWidth: number
   rightClickPaste: boolean
   copyOnSelect: boolean
+  shellIntegration: boolean
 }
 
 interface SettingsState extends Settings {
@@ -37,7 +38,8 @@ const defaultSettings: Settings = {
   dividerColor: '#ff8c00',
   dividerWidth: 4,
   rightClickPaste: false,
-  copyOnSelect: false
+  copyOnSelect: false,
+  shellIntegration: false
 }
 
 const CONFIG_NAME = 'settings'
@@ -57,7 +59,8 @@ function extractSettings(state: SettingsState): Settings {
     dividerColor: state.dividerColor,
     dividerWidth: state.dividerWidth,
     rightClickPaste: state.rightClickPaste,
-    copyOnSelect: state.copyOnSelect
+    copyOnSelect: state.copyOnSelect,
+    shellIntegration: state.shellIntegration
   }
 }
 

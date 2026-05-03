@@ -2,6 +2,7 @@ import { app, BrowserWindow, Menu, ipcMain, shell } from 'electron'
 import { join } from 'path'
 import { setupPtyHandlers, destroyAllPtys } from './ptyManager'
 import { readConfig, writeConfig } from './configManager'
+import { enableContextMenu, disableContextMenu } from './shellIntegration'
 
 const isDev = !app.isPackaged
 
@@ -73,6 +74,10 @@ function createWindow(): void {
 
   // 应用版本
   ipcMain.handle('app:getVersion', () => app.getVersion())
+
+  // 右键菜单集成
+  ipcMain.handle('shell:enableContextMenu', () => enableContextMenu())
+  ipcMain.handle('shell:disableContextMenu', () => disableContextMenu())
 
   // 最大化状态变化通知
   mainWindow.on('maximize', () => {

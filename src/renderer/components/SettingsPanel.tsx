@@ -198,6 +198,23 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ visible, onClose }
                 onChange={e => settings.updateSettings({ copyOnSelect: e.target.checked })}
               />
             </div>
+            <div className="settings-row">
+              <span className="settings-label">文件夹右键菜单</span>
+              <input
+                className="settings-checkbox"
+                type="checkbox"
+                checked={settings.shellIntegration}
+                onChange={e => {
+                  const enabled = e.target.checked
+                  settings.updateSettings({ shellIntegration: enabled })
+                  if (enabled) {
+                    window.shellAPI.enableContextMenu()
+                  } else {
+                    window.shellAPI.disableContextMenu()
+                  }
+                }}
+              />
+            </div>
           </div>
 
           <div className="settings-section">

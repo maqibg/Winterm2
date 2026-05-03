@@ -101,6 +101,12 @@ contextBridge.exposeInMainWorld('shellAPI', {
   },
   openTerminalPath(paneId: string, rawPath: string): Promise<void> {
     return ipcRenderer.invoke('shell:openTerminalPath', { paneId, rawPath })
+  },
+  enableContextMenu(): Promise<void> {
+    return ipcRenderer.invoke('shell:enableContextMenu')
+  },
+  disableContextMenu(): Promise<void> {
+    return ipcRenderer.invoke('shell:disableContextMenu')
   }
 })
 

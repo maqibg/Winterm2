@@ -24,6 +24,8 @@ interface ShellAPI {
   openPath(filePath: string): Promise<void>
   openExternal(url: string): Promise<void>
   openTerminalPath(paneId: string, rawPath: string): Promise<void>
+  enableContextMenu(): Promise<void>
+  disableContextMenu(): Promise<void>
 }
 
 interface ClipboardAPI {

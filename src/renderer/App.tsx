@@ -44,11 +44,14 @@ const App: React.FC = () => {
   useEffect(() => {
     // Load config from files, then apply theme
     useSettingsStore.getState().loadSettings().then(() => {
-      const { themeName } = useSettingsStore.getState()
+      const { themeName, shellIntegration } = useSettingsStore.getState()
       if (themeName) {
         useThemeStore.getState().setTheme(themeName)
       } else {
         applyThemeToCSS()
+      }
+      if (shellIntegration) {
+        window.shellAPI.enableContextMenu()
       }
     })
     useCommandStore.getState().loadCommands()
