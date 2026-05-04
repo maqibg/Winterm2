@@ -116,6 +116,15 @@ function attachToContainer(paneId: string, instance: TerminalInstance, container
     // First time opening
     term.open(container)
 
+    // Intercept paste events for image support (xterm.js textarea bypasses customKeyHandler)
+    container.addEventListener('paste', (e: ClipboardEvent) => {
+      if (window.clipboardAPI.hasImage()) {
+        e.preventDefault()
+        e.stopPropagation()
+        window.terminalAPI.writePty(paneId, '\x1bv')
+      }
+    }, true)
+
     // Create PTY with shell and cwd from settings
     const { defaultShell, startupCwd } = useSettingsStore.getState()
     const restoredCwd = restoredCwds.get(paneId)
