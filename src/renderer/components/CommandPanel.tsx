@@ -70,6 +70,10 @@ export const CommandPanel: React.FC<CommandPanelProps> = ({ visible, onClose }) 
   const [formName, setFormName] = useState('')
   const [formCommand, setFormCommand] = useState('')
   const [formGroup, setFormGroup] = useState('')
+  const [formSort, setFormSort] = useState(1)
+  const [editingGroup, setEditingGroup] = useState<string | null>(null)
+  const [editGroupName, setEditGroupName] = useState('')
+  const [editGroupSort, setEditGroupSort] = useState(1)
 
   const panelRef = useRef<HTMLDivElement>(null)
   const nameInputRef = useRef<HTMLInputElement>(null)
@@ -81,7 +85,28 @@ export const CommandPanel: React.FC<CommandPanelProps> = ({ visible, onClose }) 
       list.push(cmd)
       map.set(cmd.group, list)
     }
-    return map
+    // Sort within each group: 0 = last, otherwise ascending
+    for (const list of map.values()) {
+      list.sort((a, b) => {
+        const sa = a.sort || 0
+        const sb = b.sort || 0
+        if (sa === 0 && sb === 0) return 0
+        if (sa === 0) return 1
+        if (sb === 0) return -1
+        return sa - sb
+      })
+    }
+    // Sort groups by groupSort: 0 = last, otherwise ascending
+    const entries = [...map.entries()]
+    entries.sort(([_ka, a], [_kb, b]) => {
+      const ga = a[0]?.groupSort || 0
+      const gb = b[0]?.groupSort || 0
+      if (ga === 0 && gb === 0) return 0
+      if (ga === 0) return 1
+      if (gb === 0) return -1
+      return ga - gb
+    })
+    return new Map(entries)
   }, [commands])
 
   const allGroups = useMemo(() => [...groups.keys()], [groups])
@@ -114,12 +139,28 @@ export const CommandPanel: React.FC<CommandPanelProps> = ({ visible, onClose }) 
     onClose()
   }
 
+  const getGroupSort = (groupName: string) => {
+    const list = groups.get(groupName)
+    return list?.[0]?.groupSort || 0
+  }
+
+  const getMaxGroupSort = () => {
+    let max = 0
+    for (const list of groups.values()) {
+      const gs = list[0]?.groupSort || 0
+      if (gs > max) max = gs
+    }
+    return max
+  }
+
   const startAdd = () => {
     setEditingId(null)
     setFormName('')
     setFormCommand('')
     setFormGroup(allGroups[0] || '常用')
+    setFormSort(1)
     setShowForm(true)
+    setEditingGroup(null)
   }
 
   const startEdit = (cmd: CommandItem) => {
@@ -127,17 +168,45 @@ export const CommandPanel: React.FC<CommandPanelProps> = ({ visible, onClose }) 
     setFormName(cmd.name)
     setFormCommand(cmd.command)
     setFormGroup(cmd.group)
+    setFormSort(cmd.sort || 1)
     setShowForm(true)
+    setEditingGroup(null)
   }
 
   const saveForm = () => {
     if (!formName.trim() || !formCommand.trim()) return
+    const sort = formSort || 1
+    const group = formGroup.trim() || '常用'
+    const isNewGroup = !groups.has(group)
+    const groupSort = isNewGroup ? getMaxGroupSort() + 1 : getGroupSort(group)
     if (editingId) {
-      updateCommand(editingId, { name: formName.trim(), command: formCommand.trim(), group: formGroup.trim() || '常用' })
+      updateCommand(editingId, { name: formName.trim(), command: formCommand.trim(), group, sort, groupSort })
     } else {
-      addCommand({ name: formName.trim(), command: formCommand.trim(), group: formGroup.trim() || '常用' })
+      addCommand({ name: formName.trim(), command: formCommand.trim(), group, sort, groupSort })
     }
     setShowForm(false)
+  }
+
+  const startEditGroup = (group: string) => {
+    setEditingGroup(group)
+    setEditGroupName(group)
+    setEditGroupSort(getGroupSort(group) || 1)
+    setShowForm(false)
+  }
+
+  const saveGroupEdit = () => {
+    if (!editingGroup || !editGroupName.trim()) return
+    const newName = editGroupName.trim()
+    const newSort = editGroupSort || 1
+    for (const cmd of commands) {
+      if (cmd.group === editingGroup) {
+        updateCommand(cmd.id, {
+          group: newName,
+          groupSort: newSort
+        })
+      }
+    }
+    setEditingGroup(null)
   }
 
   const handleFormKeyDown = (e: React.KeyboardEvent) => {
@@ -164,7 +233,36 @@ export const CommandPanel: React.FC<CommandPanelProps> = ({ visible, onClose }) 
               <div className="command-panel-group-header" onClick={() => toggleGroup(group)}>
                 <span className={`command-panel-group-arrow ${collapsedGroups.has(group) ? 'collapsed' : ''}`}>▼</span>
                 {group}
+                <div className="command-panel-cmd-actions command-panel-group-actions">
+                  <button className="command-panel-cmd-btn" onClick={(e) => { e.stopPropagation(); startEditGroup(group) }} title="编辑分组">✎</button>
+                </div>
               </div>
+              {editingGroup === group && (
+                <div className="command-panel-form" onKeyDown={(e) => { if (e.key === 'Enter') saveGroupEdit(); if (e.key === 'Escape') setEditingGroup(null) }}>
+                  <div className="command-panel-form-row">
+                    <input
+                      className="command-panel-input"
+                      placeholder="分组名称"
+                      value={editGroupName}
+                      onChange={(e) => setEditGroupName(e.target.value)}
+                      autoFocus
+                    />
+                    <input
+                      className="command-panel-input command-panel-sort-input"
+                      type="number"
+                      min={0}
+                      placeholder="排序"
+                      title="分组排序，数字越小越靠前，0排最后"
+                      value={editGroupSort}
+                      onChange={(e) => setEditGroupSort(Math.max(0, parseInt(e.target.value) || 0))}
+                    />
+                  </div>
+                  <div className="command-panel-form-actions">
+                    <button className="command-panel-btn command-panel-btn-cancel" onClick={() => setEditingGroup(null)}>取消</button>
+                    <button className="command-panel-btn command-panel-btn-primary" onClick={saveGroupEdit}>保存</button>
+                  </div>
+                </div>
+              )}
               {!collapsedGroups.has(group) && cmds.map((cmd) => (
                 <div key={cmd.id} className="command-panel-cmd" onClick={() => executeCommand(cmd)}>
                   <span className="command-panel-cmd-name">{cmd.name}</span>
@@ -194,12 +292,23 @@ export const CommandPanel: React.FC<CommandPanelProps> = ({ visible, onClose }) 
                 onChange={setFormGroup}
               />
             </div>
-            <input
-              className="command-panel-input"
-              placeholder="命令"
-              value={formCommand}
-              onChange={(e) => setFormCommand(e.target.value)}
-            />
+            <div className="command-panel-form-row">
+              <input
+                className="command-panel-input"
+                placeholder="命令"
+                value={formCommand}
+                onChange={(e) => setFormCommand(e.target.value)}
+              />
+              <input
+                className="command-panel-input command-panel-sort-input"
+                type="number"
+                min={0}
+                placeholder="排序"
+                title="数字越小越靠前，0排最后"
+                value={formSort}
+                onChange={(e) => setFormSort(Math.max(0, parseInt(e.target.value) || 0))}
+              />
+            </div>
             <div className="command-panel-form-actions">
               <button className="command-panel-btn command-panel-btn-cancel" onClick={() => setShowForm(false)}>取消</button>
               <button className="command-panel-btn command-panel-btn-primary" onClick={saveForm}>{editingId ? '保存' : '添加'}</button>

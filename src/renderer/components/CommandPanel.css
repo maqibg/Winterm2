@@ -83,6 +83,18 @@
   color: var(--accent);
 }
 
+.command-panel-group-actions {
+  margin-left: auto;
+}
+
+.command-panel-group-header .command-panel-group-actions {
+  display: none;
+}
+
+.command-panel-group-header:hover .command-panel-group-actions {
+  display: flex;
+}
+
 .command-panel-group-arrow {
   font-size: 8px;
   transition: transform 0.15s;
@@ -181,6 +193,13 @@
 
 .command-panel-input:focus {
   border-color: var(--accent);
+}
+
+.command-panel-sort-input {
+  width: 56px;
+  min-width: 56px;
+  flex: none;
+  text-align: center;
 }
 
 .command-panel-form-actions {

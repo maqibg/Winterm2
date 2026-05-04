@@ -6,6 +6,8 @@ export interface CommandItem {
   name: string
   command: string
   group: string
+  sort: number
+  groupSort: number
 }
 
 interface CommandState {
@@ -20,11 +22,11 @@ interface CommandState {
 const CONFIG_NAME = 'commands'
 
 const defaultCommands: CommandItem[] = [
-  { id: nanoid(), name: '查看IP', command: 'ipconfig', group: '系统' },
-  { id: nanoid(), name: '查看端口', command: 'netstat -ano', group: '系统' },
-  { id: nanoid(), name: 'Git状态', command: 'git status', group: 'Git' },
-  { id: nanoid(), name: 'Git日志', command: 'git log --oneline -20', group: 'Git' },
-  { id: nanoid(), name: 'Git差异', command: 'git diff', group: 'Git' },
+  { id: nanoid(), name: '查看IP', command: 'ipconfig', group: '系统', sort: 1, groupSort: 1 },
+  { id: nanoid(), name: '查看端口', command: 'netstat -ano', group: '系统', sort: 1, groupSort: 1 },
+  { id: nanoid(), name: 'Git状态', command: 'git status', group: 'Git', sort: 1, groupSort: 2 },
+  { id: nanoid(), name: 'Git日志', command: 'git log --oneline -20', group: 'Git', sort: 1, groupSort: 2 },
+  { id: nanoid(), name: 'Git差异', command: 'git diff', group: 'Git', sort: 1, groupSort: 2 },
 ]
 
 export const useCommandStore = create<CommandState>((set, get) => ({
@@ -54,10 +56,16 @@ export const useCommandStore = create<CommandState>((set, get) => ({
       if (raw) {
         const saved = JSON.parse(raw) as CommandItem[]
         if (saved.length > 0) {
+          // Migrate: add sort/groupSort fields to commands missing them
+          const migrated = saved.map(c => ({
+            ...c,
+            sort: c.sort == null ? 1 : c.sort,
+            groupSort: c.groupSort == null ? 1 : c.groupSort
+          }))
           // Merge missing default groups
-          const savedGroups = new Set(saved.map(c => c.group))
+          const savedGroups = new Set(migrated.map(c => c.group))
           const missing = defaultCommands.filter(c => !savedGroups.has(c.group))
-          set({ commands: missing.length > 0 ? [...saved, ...missing] : saved })
+          set({ commands: missing.length > 0 ? [...migrated, ...missing] : migrated })
           return
         }
       }
