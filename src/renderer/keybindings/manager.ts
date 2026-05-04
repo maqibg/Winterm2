@@ -113,16 +113,7 @@ class KeybindingManager {
         return true
       }
 
-      // Ctrl+V: smart paste with image detection
-      if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key === 'v') {
-        if (window.clipboardAPI.hasImage()) {
-          term.write('\x1bv')
-        } else {
-          const text = window.clipboardAPI.readText()
-          if (text) term.paste(text)
-        }
-        return false
-      }
+      // Ctrl+V is handled by the paste event listener in useTerminal.ts
 
       return !this.matchesKeybinding(e)
     }

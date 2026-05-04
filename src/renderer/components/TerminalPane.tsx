@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useState } from 'react'
 import '@xterm/xterm/css/xterm.css'
-import { useTerminal, getTerminalInstance } from '../hooks/useTerminal'
+import { useTerminal } from '../hooks/useTerminal'
 import { useSettingsStore } from '../store/settingsStore'
 import { useThemeStore } from '../store/themeStore'
 import { useTabStore } from '../store/tabStore'
@@ -54,14 +54,11 @@ const TerminalPane: React.FC<TerminalPaneProps> = ({ paneId, isActive, isVisible
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault()
     if (rightClickPaste && !e.shiftKey) {
-      const term = getTerminalInstance(paneId)
-      if (term) {
-        if (window.clipboardAPI.hasImage()) {
-          term.write('\x1bv')
-        } else {
-          const text = window.clipboardAPI.readText()
-          if (text) term.paste(text)
-        }
+      if (window.clipboardAPI.hasImage()) {
+        window.terminalAPI.writePty(paneId, '\x1bv')
+      } else {
+        const text = window.clipboardAPI.readText()
+        if (text) window.terminalAPI.writePty(paneId, text)
       }
       return
     }
@@ -89,14 +86,12 @@ const TerminalPane: React.FC<TerminalPaneProps> = ({ paneId, isActive, isVisible
           items={[
             { label: '复制', action: () => { navigator.clipboard.writeText(document.getSelection()?.toString() || '') } },
             { label: '粘贴', action: () => {
-              const term = getTerminalInstance(paneId)
-              if (!term) return
               if (window.clipboardAPI.hasImage()) {
-                term.write('\x1bv')
+                window.terminalAPI.writePty(paneId, '\x1bv')
                 return
               }
               const text = window.clipboardAPI.readText()
-              if (text) term.paste(text)
+              if (text) window.terminalAPI.writePty(paneId, text)
             } },
             { separator: true, label: '', action: () => {} },
             { label: '水平分屏', action: () => { const { getActiveTab, splitPane } = useTabStore.getState(); const tab = getActiveTab(); if (tab) splitPane(tab.id, paneId, 'horizontal') } },

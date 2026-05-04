@@ -116,12 +116,15 @@ function attachToContainer(paneId: string, instance: TerminalInstance, container
     // First time opening
     term.open(container)
 
-    // Intercept paste events for image support (xterm.js textarea bypasses customKeyHandler)
+    // Unified paste handler (Ctrl+V and right-click both go through here)
     container.addEventListener('paste', (e: ClipboardEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
       if (window.clipboardAPI.hasImage()) {
-        e.preventDefault()
-        e.stopPropagation()
-        term.write('\x1bv')
+        window.terminalAPI.writePty(paneId, '\x1bv')
+      } else {
+        const text = e.clipboardData?.getData('text') || window.clipboardAPI.readText()
+        if (text) window.terminalAPI.writePty(paneId, text)
       }
     }, true)
 
