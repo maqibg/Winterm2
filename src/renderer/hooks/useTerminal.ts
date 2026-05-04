@@ -121,7 +121,7 @@ function attachToContainer(paneId: string, instance: TerminalInstance, container
       if (window.clipboardAPI.hasImage()) {
         e.preventDefault()
         e.stopPropagation()
-        window.terminalAPI.writePty(paneId, '\x1bv')
+        term.write('\x1bv')
       }
     }, true)
 
@@ -419,6 +419,11 @@ export function useTerminal(options: UseTerminalOptions): UseTerminalReturn {
 
 // Export for cleanup when tabs/panes are removed
 export { destroyInstance as destroyTerminalInstance }
+
+// Export for accessing terminal instance from outside components
+export function getTerminalInstance(paneId: string): Terminal | null {
+  return terminalInstances.get(paneId)?.terminal ?? null
+}
 
 // Export for accessing search addon from outside components
 export function getSearchAddon(paneId: string): SearchAddon | null {
