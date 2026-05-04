@@ -20,7 +20,7 @@
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .command-panel-header {
