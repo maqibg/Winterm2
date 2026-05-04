@@ -100,7 +100,7 @@ class KeybindingManager {
   }
 
   /** Ctrl+C/V 智能处理：有选中→复制，无选中→SIGINT；V→图片检测或粘贴 */
-  createSmartKeyHandler(term: Terminal): (e: KeyboardEvent) => boolean {
+  createSmartKeyHandler(term: Terminal, paneId: string): (e: KeyboardEvent) => boolean {
     return (e: KeyboardEvent): boolean => {
       if (e.type !== 'keydown') return true
 
@@ -113,7 +113,16 @@ class KeybindingManager {
         return true
       }
 
-      // Ctrl+V is handled by the paste event listener in useTerminal.ts
+      // Ctrl+V: smart paste with image detection
+      if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key === 'v') {
+        if (window.clipboardAPI.hasImage()) {
+          window.terminalAPI.writePty(paneId, '\x1bv')
+        } else {
+          const text = window.clipboardAPI.readText()
+          if (text) window.terminalAPI.writePty(paneId, text)
+        }
+        return false
+      }
 
       return !this.matchesKeybinding(e)
     }

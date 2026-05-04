@@ -87,7 +87,7 @@ function getOrCreateInstance(paneId: string, options: {
     console.warn('WebGL addon failed to load, falling back to canvas renderer:', e)
   }
 
-  term.attachCustomKeyEventHandler(keybindingManager.createSmartKeyHandler(term))
+  term.attachCustomKeyEventHandler(keybindingManager.createSmartKeyHandler(term, paneId))
 
   const instance: TerminalInstance = {
     terminal: term,
